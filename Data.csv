@@ -1,5 +1,6 @@
-Name, User-ID, Pin, Date, Timestamp, In/out
-Admin, 00001
+Name, User-ID, Pin
+Admin, 00001, 314159
+D. T, 00126
 Freya Carey, 00304
 Watson Cox, 00979
 Sadie Atkinson, 00940
@@ -23,4 +24,3 @@ Uriah Olson, 00861
 Isabel Burnett, 00494
 Davis Truong, 00661
 Judith Mays, 00260
-Jadiel Lynn, 00856
