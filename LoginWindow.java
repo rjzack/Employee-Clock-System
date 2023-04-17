@@ -7,6 +7,7 @@ import java.awt.Color;	// for coloring labels
 import java.time.*;	// for dates and the time
 import java.time.format.DateTimeFormatter;	// for formating time to convienence
 import java.io.*;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -126,7 +127,7 @@ public class LoginWindow
 			public void run() {
 				//new UserPanel("test","00001"); used to test the userpanel
 				new LoginWindow();
-				//System.out.println(System.getProperty("user.dir"));
+				System.out.println(System.getProperty("user.dir"));
 				
 			}
 		});
@@ -184,7 +185,7 @@ class UserPanel extends JFrame
 		
 		JLabel infoLbl = new JLabel(getUserInfo(ID,"<br>","<html>")); //necessary html formatting for multilined labels
 		infoLbl.setLocation(210, 40);
-		infoLbl.setSize(150, 150);
+		infoLbl.setSize(175, 150);
 		infoLbl.setOpaque(true);
 		infoLbl.setBackground(Color.WHITE); // used to differentiate from background bc of formating
 		add(infoLbl);
@@ -259,24 +260,31 @@ class UserPanel extends JFrame
 	{
 		try
 		{
-			File f = new File(System.getProperty("user.dir")+"\\Userfiles\\"+ID+".csv");
+			File f = new File(System.getProperty("user.dir").replace("\\", "/")+"/Userfiles/"+ID+".csv");
 			FileReader file = new FileReader(f);
 			BufferedReader reader = new BufferedReader(file);
+			int size = 9;
 			String temp = starter;
-			String temp2 = "";
 			String line = "";
 			line = reader.readLine();
-			while ((line = reader.readLine()) != null) {
-				temp += line + delimiter;
-				temp2 = line; //used to get the last fruitful line
+			ArrayList<String> arr = new ArrayList<String>();
+			while ((line = reader.readLine()) != null && ! line.equals("")) {
+				arr.add(line);
+                if (arr.size() > size) {
+                    arr.remove(0);
+                }
+			}
+			for(String item: arr)
+			{
+			    temp += item + delimiter;
 			}
 			reader.close();
 			file.close();
-			if (temp2.contains("IN"))
+			if (arr.get(size-1).contains("IN"))
 			{
 				statusLbl.setText("Status: IN");
 			}
-			else if (temp2.contains("OUT"))
+			else if (arr.get(size-1).contains("OUT"))
 			{
 				statusLbl.setText("Status: OUT");  	// Determines the status label
 			}
@@ -298,7 +306,7 @@ class UserPanel extends JFrame
 	{
 		try
 		{
-			FileWriter fw = new FileWriter(System.getProperty("user.dir")+"\\Userfiles\\"+ID+".csv", true); // takes absolute directory and finds the appropriate csv file
+			FileWriter fw = new FileWriter(System.getProperty("user.dir").replace("\\", "/")+"/Userfiles/"+ID+".csv", true); // takes absolute directory and finds the appropriate csv file
 			LocalDateTime myDateObj = LocalDateTime.now();    
 			DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("MM/dd/yyyy, HH:mm");  // Date formating
 			String formattedDate = myDateObj.format(myFormatObj);  
