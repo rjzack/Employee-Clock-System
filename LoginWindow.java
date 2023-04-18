@@ -15,6 +15,8 @@ import javax.swing.JTextField;	//swing var
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;	//admin scroll
 
 public class LoginWindow 
 {
@@ -127,8 +129,7 @@ public class LoginWindow
 			public void run() {
 				//new UserPanel("test","00001"); used to test the userpanel
 				new LoginWindow();
-				System.out.println(System.getProperty("user.dir"));
-				
+				//System.out.println(System.getProperty("user.dir"));
 			}
 		});
 	}
@@ -136,22 +137,102 @@ public class LoginWindow
 
 class AdminPanel extends JFrame 
 {
-
+	JTextArea area;
+	String UserInfo = "";
+	int userCount = 0;
 	public AdminPanel() 
 	{
-		setTitle("Welcome!");
+		setTitle("Admin Interface");
 		setSize(400, 300);
 		setLocationRelativeTo(null);
 		//setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 
-		JLabel welcomeLabel = new JLabel("Welcome to the application!");
-		welcomeLabel.setLocation(100, 100);
-		welcomeLabel.setSize(200, 25);
+		JLabel welcomeLabel = new JLabel("ID Search");
+		welcomeLabel.setLocation(180, 20);
+		welcomeLabel.setSize(75, 25);
 		add(welcomeLabel);
-
+		
+		JTextField IDField = new JTextField();
+		IDField.setLocation(245, 22);	//ID Text Field
+		IDField.setSize(50, 25);
+		add(IDField);
+		
+		JLabel newName = new JLabel("Name:");
+		newName.setLocation(5,20);
+		newName.setSize(40,25);
+		add(newName);
+		
+		JLabel newId = new JLabel("ID:");
+		newId.setLocation(26,60);
+		newId.setSize(40,25);
+		add(newId);
+		
+		JLabel newPin = new JLabel("PIN:");
+		newPin.setLocation(19,100);
+		newPin.setSize(40,25);
+		add(newPin);
+		
+		JTextField nName = new JTextField();
+		nName.setLocation(52,23);
+		nName.setSize(110,23);
+		add(nName);
+		
+		JTextField nId = new JTextField();
+		nId.setLocation(52,63);
+		nId.setSize(110,23);
+		add(nId);
+		
+		JTextField nPin = new JTextField();
+		nPin.setLocation(52,103);
+		nPin.setSize(110,23);
+		add(nPin);
+		
+		JButton addButton = new JButton("Add New User");
+		addButton.setLocation(25, 143);
+		addButton.setSize(120, 35);
+		addButton.addActionListener(new ActionListener() 
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				try
+				{
+					if (! (nName.getText().equals("")|nId.getText().equals("")|nPin.getText().equals("")|Integer.parseInt(nId.getText())>100000|Integer.parseInt(nId.getText())<0|Integer.parseInt(nPin.getText())>1000000|Integer.parseInt(nPin.getText())<0))
+					{
+						File usrfil = new File(System.getProperty("user.dir").replace("\\", "/")+"/Userfiles/"+nId.getText()+".csv");
+						FileWriter fw = new FileWriter(usrfil);
+						fw.write("Date, Timestamp, In/Out"); //writing
+						fw.close();
+						File file = new File("Data.csv");
+						FileWriter fw2 = new FileWriter(file,true);
+						fw2.write("\n"+nName.getText()+", "+nId.getText()+", "+nPin.getText());
+						fw2.close();
+						int holder = getUserCount();
+					}
+					else
+					{
+						JOptionPane.showMessageDialog(null, "Make sure ID is 5 digits and Pin is 6");
+					}
+				}
+				catch (IOException b)
+				{
+					System.out.println("" + b);
+				}
+				catch(NumberFormatException n)
+				{
+					JOptionPane.showMessageDialog(null, "Fields cannot be blank and ID/Pin can only be numbers");
+				}
+				catch(Exception c)
+				{
+					System.out.println(""+c);
+				}
+			}
+		});
+		add(addButton);
+		
 		JButton exitButton = new JButton("Exit");										// ADMIN PANEL IS WIP
-		exitButton.setLocation(100, 150);
-		exitButton.setSize(75, 35);
+		exitButton.setLocation(25, 215);
+		exitButton.setSize(120, 35);
 		exitButton.addActionListener(new ActionListener() 
 		{
 			@Override
@@ -161,9 +242,77 @@ class AdminPanel extends JFrame
 			}
 		});
 		add(exitButton);
+		
+		area = new JTextArea(getUserCount(),3);
+		area.setEditable(false);
+		userCount = getUserCount();
+		JScrollPane scroll = new JScrollPane(area);
+		scroll.setLocation(170,50);
+		scroll.setSize(200,200);
+		add(scroll);
+		
+		JButton lookupBtn = new JButton("GO");										
+		lookupBtn.setLocation(300, 22);
+		lookupBtn.setSize(65, 25);
+		lookupBtn.addActionListener(new ActionListener() 
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				if (UserInfo.contains(", "+IDField.getText()+","))
+				{
+					try
+					{
+						new UserPanel(IDField.getText(),IDField.getText());
+					}
+					catch (Exception c)
+					{
+						System.out.println("" + c);
+					}
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(null, "Invalid ID");
+				}
+				IDField.setText("");
+			}
+		});
+		add(lookupBtn);
+		
 		getContentPane().setLayout(null); //enforces absolute layout
 		setVisible(true);
 	}
+	
+	private int getUserCount()
+	{
+		try
+		{
+			File file = new File("Data.csv");
+			FileReader fr = new FileReader(file);
+			BufferedReader br = new BufferedReader(fr);
+			String line = "";
+			int counter = 0;
+			while((line = br.readLine())!=null)
+			{
+				counter++;
+				UserInfo += line + "\n\n";
+			}
+			br.close();
+			if (area != null)
+			{
+				area.selectAll();
+				area.replaceSelection("");
+				area.append(UserInfo);
+			}
+			return counter;
+		}
+		catch (IOException e)
+		{
+			System.out.println("" + e);
+		}
+		return 0;
+	}
+
 }
 
 
@@ -280,11 +429,15 @@ class UserPanel extends JFrame
 			}
 			reader.close();
 			file.close();
-			if (arr.get(size-1).contains("IN"))
+			if (line == null)
+			{
+				//skipping for error
+			}
+			else if (arr.get(arr.size()-1).contains("IN"))
 			{
 				statusLbl.setText("Status: IN");
 			}
-			else if (arr.get(size-1).contains("OUT"))
+			else if (arr.get(arr.size()-1).contains("OUT"))
 			{
 				statusLbl.setText("Status: OUT");  	// Determines the status label
 			}
@@ -312,8 +465,6 @@ class UserPanel extends JFrame
 			String formattedDate = myDateObj.format(myFormatObj);  
 			fw.write("\n"+formattedDate+", "+inOrOut); //writing
 			fw.close();
-			
-			
 		}
 		catch (IOException e)
 		{
